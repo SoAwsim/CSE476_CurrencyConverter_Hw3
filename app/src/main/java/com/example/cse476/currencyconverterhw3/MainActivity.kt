@@ -25,14 +25,14 @@ import com.example.cse476.currencyconverterhw3.viewmodel.MainViewModel
 class MainActivity : AppCompatActivity() {
     private val model: MainViewModel by viewModels()
 
-    private val progressBarStatusText = this.findViewById<TextView>(R.id.progressStatus)
-    private val progressBar = this.findViewById<ProgressBar>(R.id.progressBar)
-    private val textView = this.findViewById<TextView>(R.id.textView)
-    private val spinnerFrom = this.findViewById<Spinner>(R.id.currencyConvertFrom)
-    private val spinnerTo = this.findViewById<Spinner>(R.id.currencyConvertTo)
-    private val editTextFrom = this.findViewById<EditText>(R.id.currencyConvertFromValue)
-    private val editTextTo = this.findViewById<EditText>(R.id.currencyConvertToValue)
-    private val convertButton = this.findViewById<Button>(R.id.button)
+    private lateinit var progressBarStatusText: TextView
+    private lateinit var progressBar: ProgressBar
+    private lateinit var textView: TextView
+    private lateinit var spinnerFrom: Spinner
+    private lateinit var spinnerTo: Spinner
+    private lateinit var editTextFrom: EditText
+    private lateinit var editTextTo: EditText
+    private lateinit var convertButton: Button
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -43,6 +43,15 @@ class MainActivity : AppCompatActivity() {
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
             insets
         }
+
+        this.progressBarStatusText = this.findViewById(R.id.progressStatus)
+        this.progressBar = this.findViewById(R.id.progressBar)
+        this.textView= this.findViewById(R.id.textView)
+        this.spinnerFrom = this.findViewById(R.id.currencyConvertFrom)
+        this.spinnerTo = this.findViewById(R.id.currencyConvertTo)
+        this.editTextFrom = this.findViewById(R.id.currencyConvertFromValue)
+        this.editTextTo = this.findViewById(R.id.currencyConvertToValue)
+        this.convertButton = this.findViewById(R.id.button)
 
         this.setupViewModelObservers()
         this.setupListeners()
