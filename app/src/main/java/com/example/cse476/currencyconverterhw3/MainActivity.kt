@@ -162,6 +162,13 @@ class MainActivity : AppCompatActivity() {
         }
 
         this.convertButton.setOnClickListener {
+            if (this.model.networkState.value != true) {
+                Toast.makeText(
+                    this,
+                    "Network disconnected, cannot convert!",
+                    Toast.LENGTH_SHORT).show()
+                return@setOnClickListener
+            }
             this.model.convertButton()
         }
     }

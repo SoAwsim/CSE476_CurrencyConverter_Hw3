@@ -10,6 +10,7 @@ import com.example.cse476.currencyconverterhw3.BuildConfig
 import com.example.cse476.currencyconverterhw3.models.currency.Currency
 import com.example.cse476.currencyconverterhw3.models.network.NetworkMonitor
 import com.example.cse476.currencyconverterhw3.xml.SupportedCurrenciesXmlParser
+import com.example.cse476.currencyconverterhw3.xml.UsdConversionRateParser
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -34,7 +35,9 @@ class MainViewModel(application: Application): AndroidViewModel(application) {
         NetworkMonitor(this.getApplication<Application>().applicationContext)
     val networkState: LiveData<Boolean> = this._networkMonitor.networkState
 
-    private val _xmlParser = SupportedCurrenciesXmlParser()
+    private val _supportedCurrencyParser = SupportedCurrenciesXmlParser()
+    private val _usdConversionRateParser = UsdConversionRateParser()
+
     var currencyFromIndex = 0
     var currencyToIndex = 0
 
@@ -60,7 +63,7 @@ class MainViewModel(application: Application): AndroidViewModel(application) {
         val connection = URL(SUPPORTED_CURRENCIES_URL).openConnection()
         connection.connect()
         val stream = connection.getInputStream()
-        val result = this@MainViewModel._xmlParser.parseSupportedCurrencies(stream, context)
+        val result = this@MainViewModel._supportedCurrencyParser.parseSupportedCurrencies(stream, context)
         stream.close()
         return@withContext result
     }
@@ -73,11 +76,40 @@ class MainViewModel(application: Application): AndroidViewModel(application) {
     }
 
     fun convertButton() {
-        val fromNumber = this._currencyField.value?.currencyFromNumber
-        _currencyField.value = CurrencyFieldState(
-            currencyFromNumber = fromNumber,
-            currencyToNumber = 20.0
-        )
+        viewModelScope.launch {
+            val fromNumber = this@MainViewModel._currencyField.value?.currencyFromNumber
+                ?: return@launch
+
+            if (this@MainViewModel.currencyFromIndex < 0 || this@MainViewModel.currencyToIndex < 0)
+                return@launch
+
+            val selectedFrom = this@MainViewModel._currencies.value?.get(currencyFromIndex)
+                ?: return@launch
+            val selectedTo = this@MainViewModel._currencies.value?.get(currencyToIndex)
+                ?: return@launch
+
+            val conversionMap = this@MainViewModel.fetchUsdConversionRates()
+            val result = selectedFrom.convertToCurrency(
+                fromNumber,
+                selectedTo.currencyCode,
+                conversionMap
+            )
+
+            _currencyField.value = CurrencyFieldState(
+                currencyFromNumber = fromNumber,
+                currencyToNumber = result
+            )
+        }
+    }
+
+    private suspend fun fetchUsdConversionRates()
+    : Map<String, Double> = withContext(Dispatchers.IO) {
+        val connection = URL(CURRENCY_API).openConnection()
+        connection.connect()
+        val stream = connection.getInputStream()
+        val result = _usdConversionRateParser.parseUsdConversionRates(stream)
+        stream.close()
+        return@withContext result
     }
 
     override fun onCleared() {

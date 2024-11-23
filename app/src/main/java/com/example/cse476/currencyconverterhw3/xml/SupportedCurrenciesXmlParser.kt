@@ -109,7 +109,7 @@ class SupportedCurrenciesXmlParser {
         val text = this.parser.text
 
         when (status) {
-            SupportedCurrencyTextParseStatus.CURRENCY_CODE -> return Currency(text)
+            SupportedCurrencyTextParseStatus.CURRENCY_CODE -> return Currency(text.uppercase())
             SupportedCurrencyTextParseStatus.STATUS -> if (!text.equals("AVAILABLE")) throw SkipCurrencyInXmlException()
             SupportedCurrencyTextParseStatus.ICON -> deferredList.add(
                 fetchCurrencyPng(text, context, CoroutineScope(Dispatchers.IO)))
