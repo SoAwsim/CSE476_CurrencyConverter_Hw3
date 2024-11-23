@@ -45,6 +45,7 @@ class CurrencyXmlParser {
             this.parser.next()
         }
 
+        parser.setInput(null)
         return currencyTable.sortedBy { it.currencyName }
     }
 
