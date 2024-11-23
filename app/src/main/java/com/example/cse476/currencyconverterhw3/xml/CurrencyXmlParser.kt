@@ -15,7 +15,7 @@ class CurrencyXmlParser {
 
     private val parser = CustomXmlPullParserFactory.newInstance()
 
-    fun parseSupportedCurrencies(stream: InputStream): HashMap<String, Currency> {
+    fun parseSupportedCurrencies(stream: InputStream): List<Currency> {
         this.parser.setInput(stream.reader())
 
         // If 0, we are reading a new currency, we should start at -2 since
@@ -24,7 +24,7 @@ class CurrencyXmlParser {
         var textParseStatus = SupportedCurrencyTextParseStatus.NONE
         var shouldSkipCurrentItem = false
         val currencyBuilder = CurrencyBuilder()
-        val currencyTable: HashMap<String, Currency> = hashMapOf()
+        val currencyTable: ArrayList<Currency> = arrayListOf()
 
         while (parser.eventType != XmlPullParser.END_DOCUMENT) {
             when (parser.eventType) {
@@ -38,19 +38,14 @@ class CurrencyXmlParser {
                         currencyBuilder, textParseStatus)
                 }
                 XmlPullParser.END_TAG -> {
-                    if (--depth == 0
-                        && !shouldSkipCurrentItem
-                        && currencyBuilder.currencyCode != null) {
-                        currencyTable.put(
-                            currencyBuilder.currencyCode!!,
-                            currencyBuilder.buildCurrency())
-                    }
+                    if (--depth == 0 && !shouldSkipCurrentItem)
+                        currencyTable.add(currencyBuilder.buildCurrency())
                 }
             }
             this.parser.next()
         }
 
-        return currencyTable
+        return currencyTable.sortedBy { it.currencyName }
     }
 
     @Throws(XmlPullParserException::class, IOException::class)

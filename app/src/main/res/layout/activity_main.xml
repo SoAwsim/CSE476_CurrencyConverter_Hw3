@@ -7,12 +7,23 @@
     android:layout_height="match_parent"
     tools:context=".MainActivity">
 
+    <ProgressBar
+        android:id="@+id/progressBar"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:visibility="visible"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
     <TextView
         android:id="@+id/textView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Please select currency types"
         android:textSize="20sp"
+        android:visibility="gone"
         app:layout_constraintBottom_toTopOf="@+id/currencyConvertFrom"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -22,6 +33,7 @@
         android:id="@+id/currencyConvertFrom"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
+        android:visibility="gone"
         app:layout_constraintBottom_toTopOf="@+id/currencyConvertFromValue"
         app:layout_constraintEnd_toStartOf="@+id/currencyConvertTo"
         app:layout_constraintStart_toStartOf="parent"
@@ -31,6 +43,7 @@
         android:id="@+id/currencyConvertTo"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
+        android:visibility="gone"
         app:layout_constraintBottom_toTopOf="@+id/currencyConvertToValue"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toEndOf="@+id/currencyConvertFrom"
@@ -44,6 +57,7 @@
         android:importantForAutofill="no"
         android:inputType="numberDecimal"
         android:textAlignment="center"
+        android:visibility="gone"
         app:layout_constraintBottom_toTopOf="@+id/button"
         app:layout_constraintEnd_toStartOf="@+id/currencyConvertToValue"
         app:layout_constraintStart_toStartOf="parent"
@@ -59,6 +73,7 @@
         android:inputType="none"
         android:enabled="false"
         android:textAlignment="center"
+        android:visibility="gone"
         app:layout_constraintBottom_toTopOf="@+id/button"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toEndOf="@+id/currencyConvertFromValue"
@@ -70,6 +85,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Convert"
+        android:visibility="gone"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"

@@ -16,34 +16,48 @@ data class CurrencyFieldState(
 )
 
 class MainViewModel: ViewModel() {
-    private val _currencyFieldState = MutableLiveData(CurrencyFieldState())
-    val currencyFieldState: LiveData<CurrencyFieldState> = _currencyFieldState
+    private val _currencyField = MutableLiveData(CurrencyFieldState())
+    val currencyField: LiveData<CurrencyFieldState> = this._currencyField
+
+    private val _isLoading = MutableLiveData<Boolean>()
+    val isLoading: LiveData<Boolean> = this._isLoading
+
+    private val _currencies = MutableLiveData<List<String>>()
+    val currencies: LiveData<List<String>> = this._currencies
 
     private val _xmlParser = CurrencyXmlParser()
 
     init {
         viewModelScope.launch {
-            this@MainViewModel.fetchAvailableCurrencies()
+            try {
+                this@MainViewModel._isLoading.value = true
+                this@MainViewModel._currencies.value = this@MainViewModel.fetchAvailableCurrencies()
+            } finally {
+                this@MainViewModel._isLoading.value = false
+            }
         }
     }
 
-    private suspend fun fetchAvailableCurrencies() = withContext(Dispatchers.IO) {
+    private suspend fun fetchAvailableCurrencies(): List<String> = withContext(Dispatchers.IO) {
         val connection = URL(SUPPORTED_CURRENCIES_URL).openConnection()
         connection.connect()
         val stream = connection.getInputStream()
         val result = this@MainViewModel._xmlParser.parseSupportedCurrencies(stream)
+        stream.close()
+
+        return@withContext result.map { it.currencyName }
     }
 
     fun updateFromCurrency(value: Double?) {
-        _currencyFieldState.value = CurrencyFieldState(
+        _currencyField.value = CurrencyFieldState(
             currencyFromNumber = value,
             currencyToNumber = null
         )
     }
 
     fun convertButton() {
-        val fromNumber = this._currencyFieldState.value?.currencyFromNumber
-        _currencyFieldState.value = CurrencyFieldState(
+        val fromNumber = this._currencyField.value?.currencyFromNumber
+        _currencyField.value = CurrencyFieldState(
             currencyFromNumber = fromNumber,
             currencyToNumber = 20.0
         )

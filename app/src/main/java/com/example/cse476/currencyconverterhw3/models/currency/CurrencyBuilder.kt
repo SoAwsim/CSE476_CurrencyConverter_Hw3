@@ -6,6 +6,7 @@ class CurrencyBuilder {
     var icon: String? = null
 
     fun buildCurrency(): Currency = Currency(
+        this.currencyCode ?: "",
         this.currencyName ?: "",
         this.icon ?: ""
     )

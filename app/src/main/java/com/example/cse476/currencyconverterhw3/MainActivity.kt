@@ -3,8 +3,13 @@ package com.example.cse476.currencyconverterhw3
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
+import android.view.View
+import android.widget.ArrayAdapter
 import android.widget.Button
 import android.widget.EditText
+import android.widget.ProgressBar
+import android.widget.Spinner
+import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
@@ -27,10 +32,40 @@ class MainActivity : AppCompatActivity() {
             insets
         }
 
+        val progressBar = this.findViewById<ProgressBar>(R.id.progressBar)
+        val textView = this.findViewById<TextView>(R.id.textView)
+        val spinnerFrom = this.findViewById<Spinner>(R.id.currencyConvertFrom)
+        val spinnerTo = this.findViewById<Spinner>(R.id.currencyConvertTo)
         val editTextFrom = this.findViewById<EditText>(R.id.currencyConvertFromValue)
         val editTextTo = this.findViewById<EditText>(R.id.currencyConvertToValue)
+        val convertButton = this.findViewById<Button>(R.id.button)
 
-        model.currencyFieldState.observe(this) { state ->
+        // I know this looks disgusting but I did not want to create another activity
+        model.isLoading.observe(this) { isLoading ->
+            progressBar.visibility = if (isLoading) View.VISIBLE else View.GONE
+            val coreComponentVisibility = if (isLoading) View.GONE else View.VISIBLE
+            textView.visibility = coreComponentVisibility
+            spinnerFrom.visibility = coreComponentVisibility
+            spinnerTo.visibility = coreComponentVisibility
+            editTextFrom.visibility = coreComponentVisibility
+            editTextTo.visibility = coreComponentVisibility
+            convertButton.visibility = coreComponentVisibility
+        }
+
+        model.currencies.observe(this) { currencies ->
+            if (currencies.isNotEmpty()) {
+                val adapter = ArrayAdapter(
+                    this,
+                    android.R.layout.simple_spinner_item,
+                    currencies
+                )
+                adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+                spinnerFrom.adapter = adapter
+                spinnerTo.adapter = adapter
+            }
+        }
+
+        model.currencyField.observe(this) { state ->
             val fromValue = state.currencyFromNumber
 
             // Prevent unnecessary event firing
@@ -60,10 +95,7 @@ class MainActivity : AppCompatActivity() {
                         Toast.LENGTH_SHORT).show()
                 }
             }
-
         })
-
-        val convertButton = this.findViewById<Button>(R.id.button)
 
         convertButton.setOnClickListener {
             model.convertButton()
