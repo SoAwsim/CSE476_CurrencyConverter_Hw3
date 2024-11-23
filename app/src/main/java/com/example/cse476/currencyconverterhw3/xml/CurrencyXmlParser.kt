@@ -1,11 +1,21 @@
 package com.example.cse476.currencyconverterhw3.xml
 
+import android.content.Context
+import android.util.Log
 import com.example.cse476.currencyconverterhw3.models.currency.Currency
 import com.example.cse476.currencyconverterhw3.models.currency.CurrencyBuilder
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Deferred
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.withContext
 import org.xmlpull.v1.XmlPullParser
 import org.xmlpull.v1.XmlPullParserException
+import java.io.File
 import java.io.IOException
 import java.io.InputStream
+import java.net.URL
 
 class CurrencyXmlParser {
     companion object {
@@ -15,8 +25,11 @@ class CurrencyXmlParser {
 
     private val parser = CustomXmlPullParserFactory.newInstance()
 
-    fun parseSupportedCurrencies(stream: InputStream): List<Currency> {
-        this.parser.setInput(stream.reader())
+    suspend fun parseSupportedCurrencies(
+        stream: InputStream,
+        context: Context
+    ): List<Currency> = withContext(Dispatchers.IO) {
+        this@CurrencyXmlParser.parser.setInput(stream.reader())
 
         // If 0, we are reading a new currency, we should start at -2 since
         // the response is wrapped inside 2 tags
@@ -25,28 +38,30 @@ class CurrencyXmlParser {
         var shouldSkipCurrentItem = false
         val currencyBuilder = CurrencyBuilder()
         val currencyTable: ArrayList<Currency> = arrayListOf()
+        val deferredList: ArrayList<Deferred<Unit>> = arrayListOf()
 
         while (parser.eventType != XmlPullParser.END_DOCUMENT) {
             when (parser.eventType) {
                 XmlPullParser.START_TAG -> {
-                    textParseStatus = processSupportedCurrencyStartTag()
+                    textParseStatus = this@CurrencyXmlParser.processSupportedCurrencyStartTag()
                     if (textParseStatus != SupportedCurrencyTextParseStatus.SKIPPED)
                         depth++
                 }
                 XmlPullParser.TEXT -> {
-                    shouldSkipCurrentItem = processSupportedCurrencyText(
-                        currencyBuilder, textParseStatus)
+                    shouldSkipCurrentItem = this@CurrencyXmlParser.processSupportedCurrencyText(
+                        currencyBuilder, textParseStatus, context, deferredList)
                 }
                 XmlPullParser.END_TAG -> {
                     if (--depth == 0 && !shouldSkipCurrentItem)
                         currencyTable.add(currencyBuilder.buildCurrency())
                 }
             }
-            this.parser.next()
+            this@CurrencyXmlParser.parser.next()
         }
 
         parser.setInput(null)
-        return currencyTable.sortedBy { it.currencyCode }
+        deferredList.awaitAll()
+        return@withContext currencyTable.sortedBy { it.currencyCode }
     }
 
     @Throws(XmlPullParserException::class, IOException::class)
@@ -63,6 +78,7 @@ class CurrencyXmlParser {
         }
     }
 
+    @Throws(XmlPullParserException::class, IOException::class)
     private fun processSupportedCurrencyStartTag(): SupportedCurrencyTextParseStatus {
         val name = this.parser.name
 
@@ -83,18 +99,56 @@ class CurrencyXmlParser {
 
     private fun processSupportedCurrencyText(
         builder: CurrencyBuilder,
-        status: SupportedCurrencyTextParseStatus
+        status: SupportedCurrencyTextParseStatus,
+        context: Context,
+        deferredList: ArrayList<Deferred<Unit>>
     ): Boolean {
         val text = this.parser.text
 
         when (status) {
             SupportedCurrencyTextParseStatus.CURRENCY_CODE -> builder.currencyCode = text
             SupportedCurrencyTextParseStatus.STATUS -> return !text.equals("AVAILABLE")
-            SupportedCurrencyTextParseStatus.ICON -> builder.icon = text
+            SupportedCurrencyTextParseStatus.ICON -> deferredList.add(
+                fetchCurrencyPng(text, context, CoroutineScope(Dispatchers.IO)))
             else -> { /* ignore */ }
         }
 
         return false
+    }
+
+    private fun fetchCurrencyPng(
+        link: String,
+        context: Context,
+        scope: CoroutineScope
+    ): Deferred<Unit> = scope.async(Dispatchers.IO) {
+        val fileName = link.substring(link.lastIndexOf('/') + 1)
+        val folder = File(context.filesDir, "currency-icons")
+
+        if (!folder.exists())
+            folder.mkdirs()
+
+        val outputFile = File(folder, fileName)
+
+        if (outputFile.exists())
+            return@async
+
+        try {
+            val pngUrl = URL(link).openConnection()
+            pngUrl.connect()
+
+            val buffer = ByteArray(8092)
+            var bytesRead: Int
+
+            val imageStream = pngUrl.getInputStream()
+            outputFile.outputStream().use { output ->
+                while (imageStream.read(buffer).also { bytesRead = it } != -1) {
+                    output.write(buffer, 0, bytesRead)
+                }
+            }
+        } catch (e: Exception) {
+            Log.e("DOWNLOAD", "Download failed", e)
+            // If an error occurs skip this image
+        }
     }
 
     private enum class SupportedCurrencyTextParseStatus {
