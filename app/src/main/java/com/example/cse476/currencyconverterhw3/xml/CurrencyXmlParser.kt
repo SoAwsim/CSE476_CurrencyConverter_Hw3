@@ -20,7 +20,7 @@ import java.net.URL
 
 class CurrencyXmlParser {
     companion object {
-        const val CURRENCY_IMAGE_DIR = "currency_icons"
+        private const val CURRENCY_IMAGE_DIR = "currency_icons"
 
         private val SKIP_SUPPORTED_CURRENCY_TAGS = arrayOf(
             "countryCode", "currencyName", "countryName", "availableFrom", "availableUntil")
