@@ -24,7 +24,15 @@ import com.example.cse476.currencyconverterhw3.viewmodel.MainViewModel
 class MainActivity : AppCompatActivity() {
     private val model: MainViewModel by viewModels()
 
-    @SuppressLint("SetTextI18n")
+    private val progressBarStatusText = this.findViewById<TextView>(R.id.progressStatus)
+    private val progressBar = this.findViewById<ProgressBar>(R.id.progressBar)
+    private val textView = this.findViewById<TextView>(R.id.textView)
+    private val spinnerFrom = this.findViewById<Spinner>(R.id.currencyConvertFrom)
+    private val spinnerTo = this.findViewById<Spinner>(R.id.currencyConvertTo)
+    private val editTextFrom = this.findViewById<EditText>(R.id.currencyConvertFromValue)
+    private val editTextTo = this.findViewById<EditText>(R.id.currencyConvertToValue)
+    private val convertButton = this.findViewById<Button>(R.id.button)
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
@@ -35,29 +43,26 @@ class MainActivity : AppCompatActivity() {
             insets
         }
 
-        val progressBarStatusText = this.findViewById<TextView>(R.id.progressStatus)
-        val progressBar = this.findViewById<ProgressBar>(R.id.progressBar)
-        val textView = this.findViewById<TextView>(R.id.textView)
-        val spinnerFrom = this.findViewById<Spinner>(R.id.currencyConvertFrom)
-        val spinnerTo = this.findViewById<Spinner>(R.id.currencyConvertTo)
-        val editTextFrom = this.findViewById<EditText>(R.id.currencyConvertFromValue)
-        val editTextTo = this.findViewById<EditText>(R.id.currencyConvertToValue)
-        val convertButton = this.findViewById<Button>(R.id.button)
+        this.setupViewModelObservers()
+        this.setupListeners()
+    }
 
+    @SuppressLint("SetTextI18n")
+    private fun setupViewModelObservers() {
         // I know this looks disgusting but I did not want to create another activity
         model.isLoading.observe(this) { isLoading ->
             val loadingComponentVisibility = if (isLoading) View.VISIBLE else View.GONE
             val coreComponentVisibility = if (isLoading) View.GONE else View.VISIBLE
 
-            progressBarStatusText.visibility = loadingComponentVisibility
-            progressBar.visibility = loadingComponentVisibility
+            this.progressBarStatusText.visibility = loadingComponentVisibility
+            this.progressBar.visibility = loadingComponentVisibility
 
-            textView.visibility = coreComponentVisibility
-            spinnerFrom.visibility = coreComponentVisibility
-            spinnerTo.visibility = coreComponentVisibility
-            editTextFrom.visibility = coreComponentVisibility
-            editTextTo.visibility = coreComponentVisibility
-            convertButton.visibility = coreComponentVisibility
+            this.textView.visibility = coreComponentVisibility
+            this.spinnerFrom.visibility = coreComponentVisibility
+            this.spinnerTo.visibility = coreComponentVisibility
+            this.editTextFrom.visibility = coreComponentVisibility
+            this.editTextTo.visibility = coreComponentVisibility
+            this.convertButton.visibility = coreComponentVisibility
         }
 
         model.networkState.observe(this) { connected ->
@@ -93,19 +98,21 @@ class MainActivity : AppCompatActivity() {
 
             editTextTo.setText(state.currencyToNumber.toUIString())
         }
+    }
 
-        editTextFrom.addTextChangedListener(object : TextWatcher {
+    private fun setupListeners() {
+        this.editTextFrom.addTextChangedListener(object : TextWatcher {
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) { }
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) { }
             override fun afterTextChanged(s: Editable?) {
                 val input = (s ?: "").toString()
                 if (input.isEmpty()) {
-                    model.updateFromCurrency(null)
+                    this@MainActivity.model.updateFromCurrency(null)
                     return
                 }
 
                 val numericValue = input.toDoubleOrNull()
-                model.updateFromCurrency(numericValue)
+                this@MainActivity.model.updateFromCurrency(numericValue)
                 if (numericValue == null) {
                     Toast.makeText(
                         this@MainActivity,
@@ -115,8 +122,8 @@ class MainActivity : AppCompatActivity() {
             }
         })
 
-        convertButton.setOnClickListener {
-            model.convertButton()
+        this.convertButton.setOnClickListener {
+            this.model.convertButton()
         }
     }
 }
