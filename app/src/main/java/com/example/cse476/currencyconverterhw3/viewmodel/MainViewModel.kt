@@ -6,6 +6,7 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
+import com.example.cse476.currencyconverterhw3.BuildConfig
 import com.example.cse476.currencyconverterhw3.models.currency.Currency
 import com.example.cse476.currencyconverterhw3.models.network.NetworkMonitor
 import com.example.cse476.currencyconverterhw3.xml.SupportedCurrenciesXmlParser
@@ -84,5 +85,6 @@ class MainViewModel(application: Application): AndroidViewModel(application) {
 
     companion object {
         private const val SUPPORTED_CURRENCIES_URL = "https://api.currencyfreaks.com/v2.0/supported-currencies?format=xml"
+        private const val CURRENCY_API = "https://api.currencyfreaks.com/v2.0/rates/latest?apikey=" + BuildConfig.API_KEY + "&format=xml"
     }
 }
