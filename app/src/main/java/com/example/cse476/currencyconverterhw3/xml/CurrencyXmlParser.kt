@@ -138,13 +138,19 @@ class CurrencyXmlParser {
         context: Context,
         scope: CoroutineScope
     ): Deferred<Pair<String, Bitmap>?> = scope.async(Dispatchers.IO) {
-        val fileName = link.substring(link.lastIndexOf('/') + 1)
-        val folder = File(context.filesDir, CURRENCY_IMAGE_DIR)
-        val fileNameWithoutExtension = fileName.substring(0, fileName.lastIndexOf('.'))
-            .lowercase()
+        var index = link.lastIndexOf('/') + 1
+        if (index == -1)
+            return@async null
+        val fileName = link.substring(index)
 
+        val folder = File(context.filesDir, CURRENCY_IMAGE_DIR)
         if (!folder.exists())
             folder.mkdirs()
+
+        index = fileName.lastIndexOf('.')
+        if (index == -1)
+            return@async null
+        val fileNameWithoutExtension = fileName.substring(0, index)
 
         val outputFile = File(folder, fileName)
         var bitmap: Bitmap? = null
