@@ -62,8 +62,9 @@ class CurrencyXmlParser {
         }
 
         parser.setInput(null)
+        val result = currencyTable.sortedBy { it.currencyCode }
         deferredList.awaitAll()
-        return@withContext currencyTable.sortedBy { it.currencyCode }
+        return@withContext result
     }
 
     @Throws(XmlPullParserException::class, IOException::class)
