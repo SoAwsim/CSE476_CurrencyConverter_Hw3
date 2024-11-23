@@ -83,26 +83,12 @@ class SupportedCurrenciesXmlParser {
     }
 
     @Throws(XmlPullParserException::class, IOException::class)
-    private fun skipCurrentTag() {
-        if (this.parser.eventType != XmlPullParser.START_TAG)
-            throw IllegalStateException()
-
-        var depth = 1
-        while (depth != 0) {
-            when (parser.next()) {
-                XmlPullParser.START_TAG -> depth++
-                XmlPullParser.END_TAG -> depth--
-            }
-        }
-    }
-
-    @Throws(XmlPullParserException::class, IOException::class)
     private fun processSupportedCurrencyStartTag(): SupportedCurrencyTextParseStatus {
         val name = this.parser.name
 
         // We do not care about these tags just skip them
         if (SKIP_SUPPORTED_CURRENCY_TAGS.any { it.equals(name) }) {
-            this.skipCurrentTag()
+            this.parser.skipCurrentTag()
             return SupportedCurrencyTextParseStatus.SKIPPED
         }
 
