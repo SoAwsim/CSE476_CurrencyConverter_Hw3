@@ -1,5 +1,6 @@
 package com.example.cse476.currencyconverterhw3
 
+import android.annotation.SuppressLint
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
@@ -22,6 +23,7 @@ import com.example.cse476.currencyconverterhw3.viewmodel.MainViewModel
 class MainActivity : AppCompatActivity() {
     private val model: MainViewModel by viewModels()
 
+    @SuppressLint("SetTextI18n")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
@@ -32,6 +34,7 @@ class MainActivity : AppCompatActivity() {
             insets
         }
 
+        val progressBarStatusText = this.findViewById<TextView>(R.id.progressStatus)
         val progressBar = this.findViewById<ProgressBar>(R.id.progressBar)
         val textView = this.findViewById<TextView>(R.id.textView)
         val spinnerFrom = this.findViewById<Spinner>(R.id.currencyConvertFrom)
@@ -42,6 +45,7 @@ class MainActivity : AppCompatActivity() {
 
         // I know this looks disgusting but I did not want to create another activity
         model.isLoading.observe(this) { isLoading ->
+            progressBarStatusText.visibility = if(isLoading) View.VISIBLE else View.GONE
             progressBar.visibility = if (isLoading) View.VISIBLE else View.GONE
             val coreComponentVisibility = if (isLoading) View.GONE else View.VISIBLE
             textView.visibility = coreComponentVisibility
@@ -50,6 +54,19 @@ class MainActivity : AppCompatActivity() {
             editTextFrom.visibility = coreComponentVisibility
             editTextTo.visibility = coreComponentVisibility
             convertButton.visibility = coreComponentVisibility
+        }
+
+        model.networkState.observe(this) { connected ->
+            if (connected) {
+                progressBarStatusText.text = "Connected fetching data from API"
+                this.model.initializeData()
+            } else if(this.model.currencies.value?.isEmpty() == true) {
+                progressBarStatusText.text = "Waiting for connection"
+                Toast.makeText(
+                    this,
+                    "Internet connection not available",
+                    Toast.LENGTH_LONG).show()
+            }
         }
 
         model.currencies.observe(this) { currencies ->

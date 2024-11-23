@@ -6,6 +6,7 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
+import com.example.cse476.currencyconverterhw3.models.network.NetworkMonitor
 import com.example.cse476.currencyconverterhw3.xml.CurrencyXmlParser
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -29,15 +30,23 @@ class MainViewModel(application: Application): AndroidViewModel(application) {
 
     private val _xmlParser = CurrencyXmlParser()
 
+    private val _networkMonitor =
+        NetworkMonitor(this.getApplication<Application>().applicationContext)
+    val networkState: LiveData<Boolean> = this._networkMonitor.networkState
+
     init {
+        this._networkMonitor.startMonitoringNetwork()
+        this._isLoading.value = true
+    }
+
+    fun initializeData() {
+        if (this._currencies.value?.isNotEmpty() == true)
+            return
+
         viewModelScope.launch {
-            try {
-                this@MainViewModel._isLoading.value = true
-                this@MainViewModel._currencies.value = this@MainViewModel.fetchAvailableCurrencies(
-                    this@MainViewModel.getApplication<Application>().applicationContext)
-            } finally {
-                this@MainViewModel._isLoading.value = false
-            }
+            this@MainViewModel._currencies.value = this@MainViewModel.fetchAvailableCurrencies(
+                this@MainViewModel.getApplication<Application>().applicationContext)
+            this@MainViewModel._isLoading.value = false
         }
     }
 
@@ -64,6 +73,11 @@ class MainViewModel(application: Application): AndroidViewModel(application) {
             currencyFromNumber = fromNumber,
             currencyToNumber = 20.0
         )
+    }
+
+    override fun onCleared() {
+        super.onCleared()
+        this._networkMonitor.stopMonitoringNetwork()
     }
 
     companion object {
