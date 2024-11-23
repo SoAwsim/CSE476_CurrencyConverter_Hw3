@@ -54,7 +54,9 @@ class MainViewModel(application: Application): AndroidViewModel(application) {
         }
     }
 
-    private suspend fun fetchAvailableCurrencies(context: Context): List<Currency> = withContext(Dispatchers.IO) {
+    private suspend fun fetchAvailableCurrencies(
+        context: Context
+    ): List<Currency> = withContext(Dispatchers.IO) {
         val connection = URL(SUPPORTED_CURRENCIES_URL).openConnection()
         connection.connect()
         val stream = connection.getInputStream()
@@ -84,7 +86,9 @@ class MainViewModel(application: Application): AndroidViewModel(application) {
     }
 
     companion object {
-        private const val SUPPORTED_CURRENCIES_URL = "https://api.currencyfreaks.com/v2.0/supported-currencies?format=xml"
-        private const val CURRENCY_API = "https://api.currencyfreaks.com/v2.0/rates/latest?apikey=" + BuildConfig.API_KEY + "&format=xml"
+        private const val SUPPORTED_CURRENCIES_URL =
+            "https://api.currencyfreaks.com/v2.0/supported-currencies?format=xml"
+        private const val CURRENCY_API =
+            "https://api.currencyfreaks.com/v2.0/rates/latest?apikey=" + BuildConfig.API_KEY + "&format=xml"
     }
 }
