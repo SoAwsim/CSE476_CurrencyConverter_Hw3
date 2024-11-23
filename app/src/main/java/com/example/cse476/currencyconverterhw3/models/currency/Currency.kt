@@ -15,14 +15,20 @@ class Currency(val currencyCode: String) {
             return currencyAmount * conversionValue
         }
 
-        val conversionValueThis = conversionMap[this.currencyCode] ?: return null
+        val plainThisCurrencyCode = if (this.currencyCode.startsWith('$'))
+            this.currencyCode.substring(1) else
+                this.currencyCode
+        val conversionValueThis = conversionMap[plainThisCurrencyCode] ?: return null
         val usdValue = currencyAmount / conversionValueThis
 
         if (convertTo.equals("USD"))
             return usdValue
 
+        val plainConvertTo = if (convertTo.startsWith('$'))
+            convertTo.substring(1) else
+                convertTo
         // Convert this currency to USD than to target currency
-        val conversionValueTarget = conversionMap[convertTo] ?: return null
+        val conversionValueTarget = conversionMap[plainConvertTo] ?: return null
         return usdValue * conversionValueTarget
     }
 }
