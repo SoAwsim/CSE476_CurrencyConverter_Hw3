@@ -18,7 +18,7 @@ import java.io.IOException
 import java.io.InputStream
 import java.net.URL
 
-class CurrencyXmlParser {
+class SupportedCurrenciesXmlParser {
     companion object {
         private const val CURRENCY_IMAGE_DIR = "currency_icons"
 
@@ -32,7 +32,7 @@ class CurrencyXmlParser {
         stream: InputStream,
         context: Context
     ): List<Currency> = withContext(Dispatchers.IO) {
-        this@CurrencyXmlParser.parser.setInput(stream.reader())
+        this@SupportedCurrenciesXmlParser.parser.setInput(stream.reader())
 
         // If 0 we are reading a new currency
         // We should start at -2 since the response is wrapped inside 2 tags
@@ -46,14 +46,14 @@ class CurrencyXmlParser {
         while (parser.eventType != XmlPullParser.END_DOCUMENT) {
             when (parser.eventType) {
                 XmlPullParser.START_TAG -> {
-                    textParseStatus = this@CurrencyXmlParser.processSupportedCurrencyStartTag()
+                    textParseStatus = this@SupportedCurrenciesXmlParser.processSupportedCurrencyStartTag()
                     if (textParseStatus != SupportedCurrencyTextParseStatus.SKIPPED)
                         depth++
                 }
                 XmlPullParser.TEXT -> {
                     if (!skipCurrentCurrency) {
                         try {
-                            val result = this@CurrencyXmlParser.processSupportedCurrencyText(
+                            val result = this@SupportedCurrenciesXmlParser.processSupportedCurrencyText(
                                 textParseStatus, context, deferredList)
                             currentCurrency = result ?: currentCurrency
                         } catch (e: SkipCurrencyInXmlException) {
@@ -72,7 +72,7 @@ class CurrencyXmlParser {
                     }
                 }
             }
-            this@CurrencyXmlParser.parser.next()
+            this@SupportedCurrenciesXmlParser.parser.next()
         }
 
         parser.setInput(null)

@@ -8,7 +8,7 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import com.example.cse476.currencyconverterhw3.models.currency.Currency
 import com.example.cse476.currencyconverterhw3.models.network.NetworkMonitor
-import com.example.cse476.currencyconverterhw3.xml.CurrencyXmlParser
+import com.example.cse476.currencyconverterhw3.xml.SupportedCurrenciesXmlParser
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -33,7 +33,7 @@ class MainViewModel(application: Application): AndroidViewModel(application) {
         NetworkMonitor(this.getApplication<Application>().applicationContext)
     val networkState: LiveData<Boolean> = this._networkMonitor.networkState
 
-    private val _xmlParser = CurrencyXmlParser()
+    private val _xmlParser = SupportedCurrenciesXmlParser()
     var currencyFromIndex = 0
     var currencyToIndex = 0
 
