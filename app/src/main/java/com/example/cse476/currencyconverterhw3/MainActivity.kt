@@ -45,9 +45,12 @@ class MainActivity : AppCompatActivity() {
 
         // I know this looks disgusting but I did not want to create another activity
         model.isLoading.observe(this) { isLoading ->
-            progressBarStatusText.visibility = if(isLoading) View.VISIBLE else View.GONE
-            progressBar.visibility = if (isLoading) View.VISIBLE else View.GONE
+            val loadingComponentVisibility = if (isLoading) View.VISIBLE else View.GONE
             val coreComponentVisibility = if (isLoading) View.GONE else View.VISIBLE
+
+            progressBarStatusText.visibility = loadingComponentVisibility
+            progressBar.visibility = loadingComponentVisibility
+
             textView.visibility = coreComponentVisibility
             spinnerFrom.visibility = coreComponentVisibility
             spinnerTo.visibility = coreComponentVisibility
@@ -95,7 +98,6 @@ class MainActivity : AppCompatActivity() {
         editTextFrom.addTextChangedListener(object : TextWatcher {
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) { }
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) { }
-
             override fun afterTextChanged(s: Editable?) {
                 val input = (s ?: "").toString()
                 if (input.isEmpty()) {
