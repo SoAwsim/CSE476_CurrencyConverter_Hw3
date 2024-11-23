@@ -5,6 +5,7 @@ import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
 import android.view.View
+import android.widget.AdapterView
 import android.widget.ArrayAdapter
 import android.widget.Button
 import android.widget.EditText
@@ -121,6 +122,35 @@ class MainActivity : AppCompatActivity() {
                 }
             }
         })
+
+        this.spinnerFrom.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+            override fun onItemSelected(
+                parent: AdapterView<*>?,
+                view: View?,
+                position: Int,
+                id: Long
+            ) {
+                this@MainActivity.model.currencyFromIndex = position
+            }
+            override fun onNothingSelected(parent: AdapterView<*>?) {
+                this@MainActivity.model.currencyFromIndex = -1
+            }
+        }
+
+        this.spinnerTo.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+            override fun onItemSelected(
+                parent: AdapterView<*>?,
+                view: View?,
+                position: Int,
+                id: Long
+            ) {
+                this@MainActivity.model.currencyToIndex = position
+            }
+            override fun onNothingSelected(parent: AdapterView<*>?) {
+                this@MainActivity.model.currencyToIndex = -1
+            }
+
+        }
 
         this.convertButton.setOnClickListener {
             this.model.convertButton()

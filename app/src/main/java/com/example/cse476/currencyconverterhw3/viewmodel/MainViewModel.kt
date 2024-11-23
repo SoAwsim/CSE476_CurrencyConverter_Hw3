@@ -29,11 +29,13 @@ class MainViewModel(application: Application): AndroidViewModel(application) {
     private val _currencies = MutableLiveData<List<Currency>>()
     val currencies: LiveData<List<Currency>> = this._currencies
 
-    private val _xmlParser = CurrencyXmlParser()
-
     private val _networkMonitor =
         NetworkMonitor(this.getApplication<Application>().applicationContext)
     val networkState: LiveData<Boolean> = this._networkMonitor.networkState
+
+    private val _xmlParser = CurrencyXmlParser()
+    var currencyFromIndex = 0
+    var currencyToIndex = 0
 
     init {
         this._networkMonitor.startMonitoringNetwork()
