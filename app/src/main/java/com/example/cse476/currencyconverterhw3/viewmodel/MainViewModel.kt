@@ -6,6 +6,7 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
+import com.example.cse476.currencyconverterhw3.models.currency.Currency
 import com.example.cse476.currencyconverterhw3.models.network.NetworkMonitor
 import com.example.cse476.currencyconverterhw3.xml.CurrencyXmlParser
 import kotlinx.coroutines.Dispatchers
@@ -25,8 +26,8 @@ class MainViewModel(application: Application): AndroidViewModel(application) {
     private val _isLoading = MutableLiveData<Boolean>()
     val isLoading: LiveData<Boolean> = this._isLoading
 
-    private val _currencies = MutableLiveData<List<String>>()
-    val currencies: LiveData<List<String>> = this._currencies
+    private val _currencies = MutableLiveData<List<Currency>>()
+    val currencies: LiveData<List<Currency>> = this._currencies
 
     private val _xmlParser = CurrencyXmlParser()
 
@@ -50,14 +51,13 @@ class MainViewModel(application: Application): AndroidViewModel(application) {
         }
     }
 
-    private suspend fun fetchAvailableCurrencies(context: Context): List<String> = withContext(Dispatchers.IO) {
+    private suspend fun fetchAvailableCurrencies(context: Context): List<Currency> = withContext(Dispatchers.IO) {
         val connection = URL(SUPPORTED_CURRENCIES_URL).openConnection()
         connection.connect()
         val stream = connection.getInputStream()
         val result = this@MainViewModel._xmlParser.parseSupportedCurrencies(stream, context)
         stream.close()
-
-        return@withContext result.map { it.currencyCode }
+        return@withContext result
     }
 
     fun updateFromCurrency(value: Double?) {

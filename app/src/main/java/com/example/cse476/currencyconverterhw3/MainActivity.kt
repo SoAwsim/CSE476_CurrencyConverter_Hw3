@@ -18,6 +18,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import com.example.cse476.currencyconverterhw3.extensions.toUIString
+import com.example.cse476.currencyconverterhw3.models.spinner.CustomSpinnerAdapter
 import com.example.cse476.currencyconverterhw3.viewmodel.MainViewModel
 
 class MainActivity : AppCompatActivity() {
@@ -74,12 +75,10 @@ class MainActivity : AppCompatActivity() {
 
         model.currencies.observe(this) { currencies ->
             if (currencies.isNotEmpty()) {
-                val adapter = ArrayAdapter(
+                val adapter = CustomSpinnerAdapter(
                     this,
-                    android.R.layout.simple_spinner_item,
                     currencies
                 )
-                adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
                 spinnerFrom.adapter = adapter
                 spinnerTo.adapter = adapter
             }
