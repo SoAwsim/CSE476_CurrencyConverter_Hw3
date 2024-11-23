@@ -1,6 +1,8 @@
 package com.example.cse476.currencyconverterhw3.xml
 
 import android.content.Context
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.util.Log
 import com.example.cse476.currencyconverterhw3.models.currency.Currency
 import kotlinx.coroutines.CoroutineScope
@@ -39,7 +41,7 @@ class CurrencyXmlParser {
         var currentCurrency : Currency? = null
         var skipCurrentCurrency = false
         val currencyTable: ArrayList<Currency> = arrayListOf()
-        val deferredList: ArrayList<Deferred<Unit>> = arrayListOf()
+        val deferredList: ArrayList<Deferred<Pair<String, Bitmap>?>> = arrayListOf()
 
         while (parser.eventType != XmlPullParser.END_DOCUMENT) {
             when (parser.eventType) {
@@ -72,9 +74,10 @@ class CurrencyXmlParser {
         }
 
         parser.setInput(null)
-        val result = currencyTable.sortedBy { it.currencyCode }
-        deferredList.awaitAll()
-        return@withContext result
+        val results = currencyTable.sortedBy { it.currencyCode }
+        val images = deferredList.awaitAll().filterNotNull().toMap()
+        results.map { it.icon = images[it.currencyCode.lowercase()] }
+        return@withContext results
     }
 
     @Throws(XmlPullParserException::class, IOException::class)
@@ -113,7 +116,7 @@ class CurrencyXmlParser {
     private fun processSupportedCurrencyText(
         status: SupportedCurrencyTextParseStatus,
         context: Context,
-        deferredList: ArrayList<Deferred<Unit>>
+        deferredList: ArrayList<Deferred<Pair<String, Bitmap>?>>
     ): Currency? {
         val text = this.parser.text
 
@@ -132,17 +135,25 @@ class CurrencyXmlParser {
         link: String,
         context: Context,
         scope: CoroutineScope
-    ): Deferred<Unit> = scope.async(Dispatchers.IO) {
+    ): Deferred<Pair<String, Bitmap>?> = scope.async(Dispatchers.IO) {
         val fileName = link.substring(link.lastIndexOf('/') + 1)
         val folder = File(context.filesDir, CURRENCY_IMAGE_DIR)
+        val fileNameWithoutExtension = fileName.substring(0, fileName.lastIndexOf('.'))
+            .lowercase()
 
         if (!folder.exists())
             folder.mkdirs()
 
         val outputFile = File(folder, fileName)
+        var bitmap: Bitmap? = null
 
-        if (outputFile.exists())
-            return@async
+        if (outputFile.exists()) {
+            bitmap = BitmapFactory.decodeFile(outputFile.absolutePath)
+            if (bitmap == null)
+                return@async null
+
+            return@async (fileNameWithoutExtension to bitmap)
+        }
 
         try {
             val pngUrl = URL(link).openConnection()
@@ -157,10 +168,18 @@ class CurrencyXmlParser {
                     output.write(buffer, 0, bytesRead)
                 }
             }
+            imageStream.close()
+
+            bitmap = BitmapFactory.decodeFile(outputFile.absolutePath)
         } catch (e: Exception) {
             Log.e("DOWNLOAD", "Download failed", e)
             // If an error occurs skip this image
         }
+
+        if (bitmap == null)
+            return@async null
+
+        return@async (fileNameWithoutExtension to bitmap)
     }
 
     private enum class SupportedCurrencyTextParseStatus {
