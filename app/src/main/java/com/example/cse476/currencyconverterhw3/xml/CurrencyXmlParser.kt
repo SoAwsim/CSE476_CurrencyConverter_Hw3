@@ -10,7 +10,7 @@ import java.io.InputStream
 class CurrencyXmlParser {
     companion object {
         private val SKIP_SUPPORTED_CURRENCY_TAGS = arrayOf(
-            "countryCode", "countryName", "availableFrom", "availableUntil")
+            "countryCode", "currencyName", "countryName", "availableFrom", "availableUntil")
     }
 
     private val parser = CustomXmlPullParserFactory.newInstance()
@@ -46,7 +46,7 @@ class CurrencyXmlParser {
         }
 
         parser.setInput(null)
-        return currencyTable.sortedBy { it.currencyName }
+        return currencyTable.sortedBy { it.currencyCode }
     }
 
     @Throws(XmlPullParserException::class, IOException::class)
@@ -74,7 +74,6 @@ class CurrencyXmlParser {
 
         val result: SupportedCurrencyTextParseStatus = when (name) {
             "currencyCode" -> SupportedCurrencyTextParseStatus.CURRENCY_CODE
-            "currencyName" -> SupportedCurrencyTextParseStatus.CURRENCY_NAME
             "status" -> SupportedCurrencyTextParseStatus.STATUS
             "icon" -> SupportedCurrencyTextParseStatus.ICON
             else -> SupportedCurrencyTextParseStatus.NONE
@@ -90,7 +89,6 @@ class CurrencyXmlParser {
 
         when (status) {
             SupportedCurrencyTextParseStatus.CURRENCY_CODE -> builder.currencyCode = text
-            SupportedCurrencyTextParseStatus.CURRENCY_NAME -> builder.currencyName = text
             SupportedCurrencyTextParseStatus.STATUS -> return !text.equals("AVAILABLE")
             SupportedCurrencyTextParseStatus.ICON -> builder.icon = text
             else -> { /* ignore */ }
@@ -103,7 +101,6 @@ class CurrencyXmlParser {
         NONE,
         SKIPPED,
         CURRENCY_CODE,
-        CURRENCY_NAME,
         STATUS,
         ICON
     }

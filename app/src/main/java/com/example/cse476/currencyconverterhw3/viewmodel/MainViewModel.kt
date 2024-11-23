@@ -45,7 +45,7 @@ class MainViewModel: ViewModel() {
         val result = this@MainViewModel._xmlParser.parseSupportedCurrencies(stream)
         stream.close()
 
-        return@withContext result.map { it.currencyName }
+        return@withContext result.map { it.currencyCode }
     }
 
     fun updateFromCurrency(value: Double?) {
