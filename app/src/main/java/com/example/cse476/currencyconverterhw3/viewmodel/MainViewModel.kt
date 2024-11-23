@@ -80,8 +80,18 @@ class MainViewModel(application: Application): AndroidViewModel(application) {
             val fromNumber = this@MainViewModel._currencyField.value?.currencyFromNumber
                 ?: return@launch
 
+            // If no currency is selected directly return
             if (this@MainViewModel.currencyFromIndex < 0 || this@MainViewModel.currencyToIndex < 0)
                 return@launch
+
+            // If the selected currencies are the same do not process just return the same number
+            if (this@MainViewModel.currencyToIndex == this@MainViewModel.currencyFromIndex) {
+                _currencyField.value = CurrencyFieldState(
+                    currencyFromNumber = fromNumber,
+                    currencyToNumber = fromNumber
+                )
+                return@launch
+            }
 
             val selectedFrom = this@MainViewModel._currencies.value?.get(currencyFromIndex)
                 ?: return@launch
