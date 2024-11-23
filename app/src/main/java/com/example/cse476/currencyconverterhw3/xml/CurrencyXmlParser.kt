@@ -3,7 +3,6 @@ package com.example.cse476.currencyconverterhw3.xml
 import android.content.Context
 import android.util.Log
 import com.example.cse476.currencyconverterhw3.models.currency.Currency
-import com.example.cse476.currencyconverterhw3.models.currency.CurrencyBuilder
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.Dispatchers
@@ -37,8 +36,8 @@ class CurrencyXmlParser {
         // We should start at -2 since the response is wrapped inside 2 tags
         var depth = -2
         var textParseStatus = SupportedCurrencyTextParseStatus.NONE
-        var shouldSkipCurrentItem = false
-        val currencyBuilder = CurrencyBuilder()
+        var currentCurrency : Currency? = null
+        var skipCurrentCurrency = false
         val currencyTable: ArrayList<Currency> = arrayListOf()
         val deferredList: ArrayList<Deferred<Unit>> = arrayListOf()
 
@@ -50,12 +49,23 @@ class CurrencyXmlParser {
                         depth++
                 }
                 XmlPullParser.TEXT -> {
-                    shouldSkipCurrentItem = this@CurrencyXmlParser.processSupportedCurrencyText(
-                        currencyBuilder, textParseStatus, context, deferredList)
+                    if (!skipCurrentCurrency) {
+                        try {
+                            val result = this@CurrencyXmlParser.processSupportedCurrencyText(
+                                textParseStatus, context, deferredList)
+                            currentCurrency = result ?: currentCurrency
+                        } catch (e: SkipCurrencyInXmlException) {
+                            currentCurrency = null
+                            skipCurrentCurrency = true
+                        }
+                    }
                 }
                 XmlPullParser.END_TAG -> {
-                    if (--depth == 0 && !shouldSkipCurrentItem)
-                        currencyTable.add(currencyBuilder.buildCurrency())
+                    if (--depth == 0 && currentCurrency != null) {
+                        currencyTable.add(currentCurrency)
+                        currentCurrency = null
+                        skipCurrentCurrency = false
+                    }
                 }
             }
             this@CurrencyXmlParser.parser.next()
@@ -101,22 +111,21 @@ class CurrencyXmlParser {
     }
 
     private fun processSupportedCurrencyText(
-        builder: CurrencyBuilder,
         status: SupportedCurrencyTextParseStatus,
         context: Context,
         deferredList: ArrayList<Deferred<Unit>>
-    ): Boolean {
+    ): Currency? {
         val text = this.parser.text
 
         when (status) {
-            SupportedCurrencyTextParseStatus.CURRENCY_CODE -> builder.currencyCode = text
-            SupportedCurrencyTextParseStatus.STATUS -> return !text.equals("AVAILABLE")
+            SupportedCurrencyTextParseStatus.CURRENCY_CODE -> return Currency(text)
+            SupportedCurrencyTextParseStatus.STATUS -> if (!text.equals("AVAILABLE")) throw SkipCurrencyInXmlException()
             SupportedCurrencyTextParseStatus.ICON -> deferredList.add(
                 fetchCurrencyPng(text, context, CoroutineScope(Dispatchers.IO)))
             else -> { /* ignore */ }
         }
 
-        return false
+        return null
     }
 
     private fun fetchCurrencyPng(
