@@ -63,8 +63,10 @@ class CurrencyXmlParser {
                     }
                 }
                 XmlPullParser.END_TAG -> {
-                    if (--depth == 0 && currentCurrency != null) {
-                        currencyTable.add(currentCurrency)
+                    if (--depth == 0) {
+                        if (!skipCurrentCurrency && currentCurrency != null)
+                            currencyTable.add(currentCurrency)
+
                         currentCurrency = null
                         skipCurrentCurrency = false
                     }
