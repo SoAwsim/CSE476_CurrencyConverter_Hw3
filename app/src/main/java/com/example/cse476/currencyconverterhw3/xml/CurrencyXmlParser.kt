@@ -19,6 +19,8 @@ import java.net.URL
 
 class CurrencyXmlParser {
     companion object {
+        const val CURRENCY_IMAGE_DIR = "currency_icons"
+
         private val SKIP_SUPPORTED_CURRENCY_TAGS = arrayOf(
             "countryCode", "currencyName", "countryName", "availableFrom", "availableUntil")
     }
@@ -31,8 +33,8 @@ class CurrencyXmlParser {
     ): List<Currency> = withContext(Dispatchers.IO) {
         this@CurrencyXmlParser.parser.setInput(stream.reader())
 
-        // If 0, we are reading a new currency, we should start at -2 since
-        // the response is wrapped inside 2 tags
+        // If 0 we are reading a new currency
+        // We should start at -2 since the response is wrapped inside 2 tags
         var depth = -2
         var textParseStatus = SupportedCurrencyTextParseStatus.NONE
         var shouldSkipCurrentItem = false
@@ -122,7 +124,7 @@ class CurrencyXmlParser {
         scope: CoroutineScope
     ): Deferred<Unit> = scope.async(Dispatchers.IO) {
         val fileName = link.substring(link.lastIndexOf('/') + 1)
-        val folder = File(context.filesDir, "currency-icons")
+        val folder = File(context.filesDir, CURRENCY_IMAGE_DIR)
 
         if (!folder.exists())
             folder.mkdirs()
