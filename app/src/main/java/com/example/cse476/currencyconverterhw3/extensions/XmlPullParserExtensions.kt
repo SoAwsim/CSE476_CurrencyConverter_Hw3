@@ -1,4 +1,4 @@
-package com.example.cse476.currencyconverterhw3.xml
+package com.example.cse476.currencyconverterhw3.extensions
 
 import org.xmlpull.v1.XmlPullParser
 import org.xmlpull.v1.XmlPullParserException

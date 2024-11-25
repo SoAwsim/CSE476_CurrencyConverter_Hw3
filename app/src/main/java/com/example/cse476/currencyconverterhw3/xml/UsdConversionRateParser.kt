@@ -1,5 +1,6 @@
 package com.example.cse476.currencyconverterhw3.xml
 
+import com.example.cse476.currencyconverterhw3.extensions.skipCurrentTag
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.xmlpull.v1.XmlPullParser

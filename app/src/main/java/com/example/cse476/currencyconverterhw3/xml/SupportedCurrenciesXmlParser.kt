@@ -4,6 +4,7 @@ import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.util.Log
+import com.example.cse476.currencyconverterhw3.extensions.skipCurrentTag
 import com.example.cse476.currencyconverterhw3.models.currency.Currency
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Deferred
