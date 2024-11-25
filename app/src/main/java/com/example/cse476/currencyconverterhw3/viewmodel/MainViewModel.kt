@@ -20,19 +20,20 @@ import kotlinx.coroutines.sync.withPermit
 import kotlinx.coroutines.withContext
 import java.net.URL
 
-data class CurrencyFieldState(
-    val currencyFromNumber: Double? = null,
-    val currencyToNumber: Double? = null
-)
-
 class MainViewModel(application: Application): AndroidViewModel(application) {
-    private val _currencyField = MutableLiveData(CurrencyFieldState())
-    val currencyField: LiveData<CurrencyFieldState> = this._currencyField
+    private val _fromCurrencyValue = MutableLiveData<Double>(null)
+    val fromCurrencyValue: LiveData<Double> = this._fromCurrencyValue
 
-    private val _isLoading = MutableLiveData<Boolean>()
+    private val _toCurrencyValue = MutableLiveData<Double>(null)
+    val toCurrencyValue: LiveData<Double> = this._toCurrencyValue
+
+    private val _convertOperationRunning = MutableLiveData(false)
+    val convertOperationRunning: LiveData<Boolean> = this._convertOperationRunning
+
+    private val _isLoading = MutableLiveData(true)
     val isLoading: LiveData<Boolean> = this._isLoading
 
-    private val _currencies = MutableLiveData<List<Currency>>(null)
+    private val _currencies = MutableLiveData<List<Currency>>()
     val currencies: LiveData<List<Currency>> = this._currencies
 
     private val _networkMonitor =
@@ -49,7 +50,6 @@ class MainViewModel(application: Application): AndroidViewModel(application) {
 
     init {
         this._networkMonitor.startMonitoringNetwork()
-        this._isLoading.value = true
     }
 
     override fun onCleared() {
@@ -76,46 +76,45 @@ class MainViewModel(application: Application): AndroidViewModel(application) {
     }
 
     fun updateFromCurrency(value: Double?) {
-        _currencyField.value = CurrencyFieldState(
-            currencyFromNumber = value,
-            currencyToNumber = null
-        )
+        this._fromCurrencyValue.value = value
+        this.clearToCurrency()
+    }
+
+    fun clearToCurrency() {
+        this._toCurrencyValue.value = null
     }
 
     fun convertButton() {
+        this._convertOperationRunning.value = true
         viewModelScope.launch {
-            val fromNumber = this@MainViewModel._currencyField.value?.currencyFromNumber
-                ?: return@launch
+            try {
+                val fromValue = this@MainViewModel._fromCurrencyValue.value ?: return@launch
 
-            // If no currency is selected directly return
-            if (this@MainViewModel.currencyFromIndex < 0 || this@MainViewModel.currencyToIndex < 0)
-                return@launch
+                // If no currency is selected directly return
+                if (this@MainViewModel.currencyFromIndex < 0 || this@MainViewModel.currencyToIndex < 0)
+                    return@launch
 
-            // If the selected currencies are the same do not process just return the same number
-            if (this@MainViewModel.currencyToIndex == this@MainViewModel.currencyFromIndex) {
-                _currencyField.value = CurrencyFieldState(
-                    currencyFromNumber = fromNumber,
-                    currencyToNumber = fromNumber
+                // If the selected currencies are the same do not process just return the same number
+                if (this@MainViewModel.currencyToIndex == this@MainViewModel.currencyFromIndex) {
+                    this@MainViewModel._toCurrencyValue.value = fromValue
+                    return@launch
+                }
+
+                val selectedFrom = this@MainViewModel._currencies.value?.get(currencyFromIndex)
+                    ?: return@launch
+                val selectedTo = this@MainViewModel._currencies.value?.get(currencyToIndex)
+                    ?: return@launch
+
+                val conversionMap = this@MainViewModel.fetchUsdConversionRates()
+                val result = selectedFrom.convertToCurrency(
+                    fromValue,
+                    selectedTo.currencyCode,
+                    conversionMap
                 )
-                return@launch
+                this@MainViewModel._toCurrencyValue.value = result
+            } finally {
+                this@MainViewModel._convertOperationRunning.value = false
             }
-
-            val selectedFrom = this@MainViewModel._currencies.value?.get(currencyFromIndex)
-                ?: return@launch
-            val selectedTo = this@MainViewModel._currencies.value?.get(currencyToIndex)
-                ?: return@launch
-
-            val conversionMap = this@MainViewModel.fetchUsdConversionRates()
-            val result = selectedFrom.convertToCurrency(
-                fromNumber,
-                selectedTo.currencyCode,
-                conversionMap
-            )
-
-            _currencyField.value = CurrencyFieldState(
-                currencyFromNumber = fromNumber,
-                currencyToNumber = result
-            )
         }
     }
 

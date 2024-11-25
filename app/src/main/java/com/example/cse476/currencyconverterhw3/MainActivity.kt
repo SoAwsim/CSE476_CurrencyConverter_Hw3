@@ -99,14 +99,21 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
-        model.currencyField.observe(this) { state ->
-            val fromValue = state.currencyFromNumber
-
+        model.fromCurrencyValue.observe(this) { value ->
             // Prevent unnecessary event firing
-            if (editTextFrom.text.toString().toDoubleOrNull() != fromValue)
-                editTextFrom.setText(fromValue.toUIString())
+            if (editTextFrom.text.toString().toDoubleOrNull() != value)
+                editTextFrom.setText(value.toUIString())
+        }
 
-            editTextTo.setText(state.currencyToNumber.toUIString())
+        model.toCurrencyValue.observe(this) { value ->
+            if (editTextTo.text.toString().toDoubleOrNull() != value)
+                editTextTo.setText(value.toUIString())
+        }
+
+        model.convertOperationRunning.observe(this) { status ->
+            this.convertButton.setEnabled(!status)
+            this.spinnerFrom.setEnabled(!status)
+            this.spinnerTo.setEnabled(!status)
         }
     }
 
@@ -139,9 +146,11 @@ class MainActivity : AppCompatActivity() {
                 position: Int,
                 id: Long
             ) {
+                this@MainActivity.model.clearToCurrency()
                 this@MainActivity.model.currencyFromIndex = position
             }
             override fun onNothingSelected(parent: AdapterView<*>?) {
+                this@MainActivity.model.clearToCurrency()
                 this@MainActivity.model.currencyFromIndex = -1
             }
         }
