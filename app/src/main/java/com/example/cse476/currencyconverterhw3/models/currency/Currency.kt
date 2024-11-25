@@ -10,7 +10,7 @@ class Currency(val currencyCode: String) {
         convertTo: String,
         conversionMap: Map<String, Double>
     ): Double? {
-        if (this.currencyCode.equals("USD")) {
+        if (this.currencyCode == "USD") {
             val conversionValue = conversionMap[convertTo] ?: return null
             return currencyAmount * conversionValue
         }
@@ -21,7 +21,7 @@ class Currency(val currencyCode: String) {
         val conversionValueThis = conversionMap[plainThisCurrencyCode] ?: return null
         val usdValue = currencyAmount / conversionValueThis
 
-        if (convertTo.equals("USD"))
+        if (convertTo == "USD")
             return usdValue
 
         val plainConvertTo = if (convertTo.startsWith('$'))
