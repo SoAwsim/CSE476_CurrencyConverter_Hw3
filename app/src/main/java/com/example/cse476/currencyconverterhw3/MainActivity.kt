@@ -161,9 +161,11 @@ class MainActivity : AppCompatActivity() {
                 position: Int,
                 id: Long
             ) {
+                this@MainActivity.model.clearToCurrency()
                 this@MainActivity.model.currencyToIndex = position
             }
             override fun onNothingSelected(parent: AdapterView<*>?) {
+                this@MainActivity.model.clearToCurrency()
                 this@MainActivity.model.currencyToIndex = -1
             }
 
