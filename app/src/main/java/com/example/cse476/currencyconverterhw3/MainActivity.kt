@@ -26,10 +26,15 @@ class MainActivity : AppCompatActivity() {
 
     private lateinit var progressBarStatusText: TextView
     private lateinit var progressBar: ProgressBar
-    private lateinit var textView: TextView
+
+    private lateinit var infoTextView: TextView
+    private lateinit var currencyFromTextView: TextView
     private lateinit var spinnerFrom: Spinner
+    private lateinit var currencyToTextView: TextView
     private lateinit var spinnerTo: Spinner
+    private lateinit var fromValueTextView: TextView
     private lateinit var editTextFrom: EditText
+    private lateinit var resultTextView: TextView
     private lateinit var editTextTo: EditText
     private lateinit var convertButton: Button
 
@@ -45,12 +50,17 @@ class MainActivity : AppCompatActivity() {
 
         this.progressBarStatusText = this.findViewById(R.id.progressStatus)
         this.progressBar = this.findViewById(R.id.progressBar)
-        this.textView= this.findViewById(R.id.textView)
-        this.spinnerFrom = this.findViewById(R.id.currencyConvertFrom)
-        this.spinnerTo = this.findViewById(R.id.currencyConvertTo)
+
+        this.infoTextView = this.findViewById(R.id.infoTextView)
+        this.currencyFromTextView = this.findViewById(R.id.currencyFromTextView)
+        this.spinnerFrom = this.findViewById(R.id.currencyConvertFromSpinner)
+        this.currencyToTextView = this.findViewById(R.id.currencyToTextView)
+        this.spinnerTo = this.findViewById(R.id.currencyConvertToSpinner)
+        this.fromValueTextView = this.findViewById(R.id.fromValueTextView)
         this.editTextFrom = this.findViewById(R.id.currencyConvertFromValue)
+        this.resultTextView = this.findViewById(R.id.resultTextView)
         this.editTextTo = this.findViewById(R.id.currencyConvertToValue)
-        this.convertButton = this.findViewById(R.id.button)
+        this.convertButton = this.findViewById(R.id.convertButton)
 
         this.setupViewModelObservers()
         this.setupListeners()
@@ -66,10 +76,14 @@ class MainActivity : AppCompatActivity() {
             this.progressBarStatusText.visibility = loadingComponentVisibility
             this.progressBar.visibility = loadingComponentVisibility
 
-            this.textView.visibility = coreComponentVisibility
+            this.infoTextView.visibility = coreComponentVisibility
+            this.currencyFromTextView.visibility = coreComponentVisibility
             this.spinnerFrom.visibility = coreComponentVisibility
+            this.currencyToTextView.visibility = coreComponentVisibility
             this.spinnerTo.visibility = coreComponentVisibility
+            this.fromValueTextView.visibility = coreComponentVisibility
             this.editTextFrom.visibility = coreComponentVisibility
+            this.resultTextView.visibility = coreComponentVisibility
             this.editTextTo.visibility = coreComponentVisibility
             this.convertButton.visibility = coreComponentVisibility
         }
