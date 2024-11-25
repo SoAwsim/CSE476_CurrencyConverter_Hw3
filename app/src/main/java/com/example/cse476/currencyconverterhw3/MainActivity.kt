@@ -145,6 +145,9 @@ class MainActivity : AppCompatActivity() {
                 position: Int,
                 id: Long
             ) {
+                if (this@MainActivity.model.currencyFromIndex == position)
+                    return
+
                 this@MainActivity.model.clearToCurrency()
                 this@MainActivity.model.currencyFromIndex = position
             }
@@ -161,6 +164,9 @@ class MainActivity : AppCompatActivity() {
                 position: Int,
                 id: Long
             ) {
+                if (this@MainActivity.model.currencyToIndex == position)
+                    return
+
                 this@MainActivity.model.clearToCurrency()
                 this@MainActivity.model.currencyToIndex = position
             }
