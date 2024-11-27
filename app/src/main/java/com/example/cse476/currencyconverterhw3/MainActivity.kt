@@ -96,9 +96,7 @@ class MainActivity : AppCompatActivity() {
         }
 
         this.model.errorMessage.observe(this) { message ->
-            currentToast?.cancel()
-            currentToast = Toast.makeText(this, message, Toast.LENGTH_SHORT)
-            currentToast?.show()
+            this.showToastMessage(message)
         }
     }
 
@@ -115,12 +113,8 @@ class MainActivity : AppCompatActivity() {
 
                 val numericValue = input.toDoubleOrNull()
                 this@MainActivity.model.updateFromCurrency(numericValue)
-                if (numericValue == null) {
-                    Toast.makeText(
-                        this@MainActivity,
-                        "Please enter a valid number",
-                        Toast.LENGTH_SHORT).show()
-                }
+                if (numericValue == null)
+                    this@MainActivity.showToastMessage("Please enter a valid number")
             }
         })
 
@@ -167,5 +161,11 @@ class MainActivity : AppCompatActivity() {
         this.binding.convertButton.setOnClickListener {
             this.model.convertButton()
         }
+    }
+
+    private fun showToastMessage(message: String) {
+        currentToast?.cancel()
+        currentToast = Toast.makeText(this, message, Toast.LENGTH_SHORT)
+        currentToast?.show()
     }
 }
