@@ -5,9 +5,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ArrayAdapter
-import android.widget.ImageView
-import android.widget.TextView
-import com.example.cse476.currencyconverterhw3.R
+import com.example.cse476.currencyconverterhw3.databinding.CustomSpinnerItemBinding
 import com.example.cse476.currencyconverterhw3.models.currency.Currency
 
 class CustomSpinnerAdapter(
@@ -35,19 +33,19 @@ class CustomSpinnerAdapter(
         convertView: View?,
         parent: ViewGroup
     ): View {
-        val view = convertView ?: LayoutInflater.from(this.context).inflate(
-            R.layout.custom_spinner_item,
-            parent,
-            false
-        )
+        val binding = if (convertView == null) {
+            CustomSpinnerItemBinding.inflate(
+                LayoutInflater.from(this.context),
+                parent,
+                false)
+        } else {
+            CustomSpinnerItemBinding.bind(convertView)
+        }
         val item = this.getItem(position)
 
-        val currencyImageView = view.findViewById<ImageView>(R.id.currencyImage)
-        val currencyTextView = view.findViewById<TextView>(R.id.currencyCode)
+        binding.currencyImage.setImageBitmap(item?.icon)
+        binding.currencyCode.text = item?.currencyCode
 
-        currencyImageView.setImageBitmap(item?.icon)
-        currencyTextView.text = item?.currencyCode
-
-        return view
+        return binding.root
     }
 }
