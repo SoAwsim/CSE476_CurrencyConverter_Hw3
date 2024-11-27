@@ -22,11 +22,11 @@ import kotlinx.coroutines.withContext
 import java.net.URL
 
 class MainViewModel(application: Application): AndroidViewModel(application) {
-    private val _fromCurrencyValue = MutableLiveData<Double>(null)
-    val fromCurrencyValue: LiveData<Double> = this._fromCurrencyValue
+    private val _fromCurrencyValue = MutableLiveData<Double?>(null)
+    val fromCurrencyValue: LiveData<Double?> = this._fromCurrencyValue
 
-    private val _toCurrencyValue = MutableLiveData<Double>(null)
-    val toCurrencyValue: LiveData<Double> = this._toCurrencyValue
+    private val _toCurrencyValue = MutableLiveData<Double?>(null)
+    val toCurrencyValue: LiveData<Double?> = this._toCurrencyValue
 
     private val _convertOperationRunning = MutableLiveData(false)
     val convertOperationRunning: LiveData<Boolean> = this._convertOperationRunning
@@ -34,8 +34,8 @@ class MainViewModel(application: Application): AndroidViewModel(application) {
     private val _isLoading = MutableLiveData(true)
     val isLoading: LiveData<Boolean> = this._isLoading
 
-    private val _currencies = MutableLiveData<List<Currency>>()
-    val currencies: LiveData<List<Currency>> = this._currencies
+    private val _currencies = MutableLiveData<List<Currency>?>()
+    val currencies: LiveData<List<Currency>?> = this._currencies
 
     private val _errorMessage = SingleLiveEvent<String>()
     val errorMessage: LiveData<String> = this._errorMessage
@@ -77,6 +77,10 @@ class MainViewModel(application: Application): AndroidViewModel(application) {
                     return@fetchResponseWithRetry this@MainViewModel.fetchAvailableCurrencies(
                         this@MainViewModel.getApplication<Application>().applicationContext)
                 }
+
+                if (this@MainViewModel._currencies.value == null)
+                    return@withPermit
+
                 this@MainViewModel._isLoading.value = false
             }
         }

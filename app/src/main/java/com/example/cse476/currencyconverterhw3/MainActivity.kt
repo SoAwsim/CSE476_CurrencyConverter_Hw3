@@ -69,7 +69,7 @@ class MainActivity : AppCompatActivity() {
         }
 
         this.model.currencies.observe(this) { currencies ->
-            if (currencies.isNotEmpty()) {
+            if (currencies?.isNotEmpty() == true) {
                 val adapter = CustomSpinnerAdapter(
                     this,
                     currencies
