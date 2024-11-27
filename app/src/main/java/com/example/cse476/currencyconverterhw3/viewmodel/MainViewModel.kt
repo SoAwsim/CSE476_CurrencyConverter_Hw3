@@ -1,5 +1,6 @@
 package com.example.cse476.currencyconverterhw3.viewmodel
 
+import SingleLiveEvent
 import android.app.Application
 import android.content.Context
 import android.util.Log
@@ -36,6 +37,9 @@ class MainViewModel(application: Application): AndroidViewModel(application) {
     private val _currencies = MutableLiveData<List<Currency>>()
     val currencies: LiveData<List<Currency>> = this._currencies
 
+    private val _errorMessage = SingleLiveEvent<String>()
+    val errorMessage: LiveData<String> = this._errorMessage
+
     private val _networkMonitor =
         NetworkMonitor(this.getApplication<Application>().applicationContext)
     val networkState: LiveData<Boolean> = this._networkMonitor.networkState
@@ -64,6 +68,9 @@ class MainViewModel(application: Application): AndroidViewModel(application) {
         viewModelScope.launch {
             this@MainViewModel._supportedCurrencySemaphore.withPermit {
                 if (this@MainViewModel._currencies.value?.isNotEmpty() == true)
+                    return@withPermit
+
+                if (this@MainViewModel.networkState.value != true)
                     return@withPermit
 
                 this@MainViewModel._currencies.value = this@MainViewModel.fetchResponseWithRetry {
@@ -105,7 +112,24 @@ class MainViewModel(application: Application): AndroidViewModel(application) {
                 val selectedTo = this@MainViewModel._currencies.value?.get(currencyToIndex)
                     ?: return@launch
 
-                val conversionMap = this@MainViewModel.fetchUsdConversionRates()
+                // Check if network is available one last time before sending the request
+                if (this@MainViewModel.networkState.value != true) {
+                    this@MainViewModel._errorMessage.value =
+                        "Network disconnected cannot convert!"
+                    return@launch
+                }
+
+                val conversionMap = try {
+                    this@MainViewModel.fetchUsdConversionRates()
+                } catch (e: Exception) {
+                    this@MainViewModel._errorMessage.value =
+                        "Fetching conversion rates from the API failed!"
+                    Log.e(
+                        TAG,
+                        "Fetching conversion rates failed with the following exception",
+                        e)
+                    return@launch
+                }
                 val result = selectedFrom.convertToCurrency(
                     fromValue,
                     selectedTo.currencyCode,
@@ -174,11 +198,10 @@ class MainViewModel(application: Application): AndroidViewModel(application) {
                     delay(5000)
                     continue
                 }
-                Log.e(
-                    TAG,
-                    "Api fetch retry limit of 4 reached. " +
-                            "Waiting for another network event to retry",
-                    e)
+                val errorMessage = "Api fetch retry limit of 4 reached. " +
+                        "Waiting for another network event to retry"
+                this._errorMessage.value = errorMessage
+                Log.e(TAG, errorMessage, e)
             }
         }
         return null

@@ -94,6 +94,12 @@ class MainActivity : AppCompatActivity() {
             this.binding.currencyConvertFromSpinner.setEnabled(!status)
             this.binding.currencyConvertToSpinner.setEnabled(!status)
         }
+
+        this.model.errorMessage.observe(this) { message ->
+            currentToast?.cancel()
+            currentToast = Toast.makeText(this, message, Toast.LENGTH_SHORT)
+            currentToast?.show()
+        }
     }
 
     private fun setupListeners() {
