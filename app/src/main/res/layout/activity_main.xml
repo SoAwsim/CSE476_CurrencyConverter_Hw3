@@ -79,7 +79,7 @@
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:minHeight="48dp"
-        app:layout_constraintBottom_toTopOf="@+id/currencyConvertFromValue"
+        app:layout_constraintBottom_toTopOf="@+id/currencyConvertFromEditText"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/currencyConvertFromSpinner" />
@@ -90,14 +90,14 @@
         android:layout_height="wrap_content"
         android:text="Convert From Curreny Value"
         android:textSize="16sp"
-        app:layout_constraintBottom_toTopOf="@+id/currencyConvertFromValue"
+        app:layout_constraintBottom_toTopOf="@+id/currencyConvertFromEditText"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/currencyConvertToSpinner"
         tools:ignore="HardcodedText" />
 
     <EditText
-        android:id="@+id/currencyConvertFromValue"
+        android:id="@+id/currencyConvertFromEditText"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:ems="10"
@@ -105,7 +105,7 @@
         android:inputType="numberDecimal"
         android:minHeight="48dp"
         android:textAlignment="center"
-        app:layout_constraintBottom_toTopOf="@+id/currencyConvertToValue"
+        app:layout_constraintBottom_toTopOf="@+id/currencyConvertToEditText"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/currencyConvertToSpinner"
@@ -117,14 +117,14 @@
         android:layout_height="wrap_content"
         android:text="Result"
         android:textSize="16sp"
-        app:layout_constraintBottom_toTopOf="@+id/currencyConvertToValue"
+        app:layout_constraintBottom_toTopOf="@+id/currencyConvertToEditText"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/currencyConvertFromValue"
+        app:layout_constraintTop_toBottomOf="@+id/currencyConvertFromEditText"
         tools:ignore="HardcodedText" />
 
     <EditText
-        android:id="@+id/currencyConvertToValue"
+        android:id="@+id/currencyConvertToEditText"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:cursorVisible="false"
@@ -138,7 +138,7 @@
         app:layout_constraintBottom_toTopOf="@+id/convertButton"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/currencyConvertFromValue"
+        app:layout_constraintTop_toBottomOf="@+id/currencyConvertFromEditText"
         tools:ignore="LabelFor" />
 
     <Button
@@ -149,7 +149,7 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/currencyConvertToValue"
+        app:layout_constraintTop_toBottomOf="@+id/currencyConvertToEditText"
         tools:ignore="HardcodedText" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

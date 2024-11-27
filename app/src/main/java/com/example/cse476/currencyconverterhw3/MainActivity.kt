@@ -6,61 +6,32 @@ import android.text.Editable
 import android.text.TextWatcher
 import android.view.View
 import android.widget.AdapterView
-import android.widget.Button
-import android.widget.EditText
-import android.widget.ProgressBar
-import android.widget.Spinner
-import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import com.example.cse476.currencyconverterhw3.databinding.ActivityMainBinding
 import com.example.cse476.currencyconverterhw3.extensions.toUIString
 import com.example.cse476.currencyconverterhw3.models.spinner.CustomSpinnerAdapter
 import com.example.cse476.currencyconverterhw3.viewmodel.MainViewModel
 
 class MainActivity : AppCompatActivity() {
     private val model: MainViewModel by viewModels()
-
-    private lateinit var progressBarStatusText: TextView
-    private lateinit var progressBar: ProgressBar
-
-    private lateinit var infoTextView: TextView
-    private lateinit var currencyFromTextView: TextView
-    private lateinit var spinnerFrom: Spinner
-    private lateinit var currencyToTextView: TextView
-    private lateinit var spinnerTo: Spinner
-    private lateinit var fromValueTextView: TextView
-    private lateinit var editTextFrom: EditText
-    private lateinit var resultTextView: TextView
-    private lateinit var editTextTo: EditText
-    private lateinit var convertButton: Button
+    private lateinit var binding: ActivityMainBinding
+    private var currentToast: Toast? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        enableEdgeToEdge()
-        setContentView(R.layout.activity_main)
-        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main)) { v, insets ->
+        this.enableEdgeToEdge()
+        this.binding = ActivityMainBinding.inflate(this.layoutInflater)
+        setContentView(this.binding.root)
+        ViewCompat.setOnApplyWindowInsetsListener(this.binding.main) { v, insets ->
             val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
             insets
         }
-
-        this.progressBarStatusText = this.findViewById(R.id.progressStatus)
-        this.progressBar = this.findViewById(R.id.progressBar)
-
-        this.infoTextView = this.findViewById(R.id.infoTextView)
-        this.currencyFromTextView = this.findViewById(R.id.currencyFromTextView)
-        this.spinnerFrom = this.findViewById(R.id.currencyConvertFromSpinner)
-        this.currencyToTextView = this.findViewById(R.id.currencyToTextView)
-        this.spinnerTo = this.findViewById(R.id.currencyConvertToSpinner)
-        this.fromValueTextView = this.findViewById(R.id.fromValueTextView)
-        this.editTextFrom = this.findViewById(R.id.currencyConvertFromValue)
-        this.resultTextView = this.findViewById(R.id.resultTextView)
-        this.editTextTo = this.findViewById(R.id.currencyConvertToValue)
-        this.convertButton = this.findViewById(R.id.convertButton)
 
         this.setupViewModelObservers()
         this.setupListeners()
@@ -73,65 +44,60 @@ class MainActivity : AppCompatActivity() {
             val loadingComponentVisibility = if (isLoading) View.VISIBLE else View.GONE
             val coreComponentVisibility = if (isLoading) View.GONE else View.VISIBLE
 
-            this.progressBarStatusText.visibility = loadingComponentVisibility
-            this.progressBar.visibility = loadingComponentVisibility
+            this.binding.progressStatus.visibility = loadingComponentVisibility
+            this.binding.progressBar.visibility = loadingComponentVisibility
 
-            this.infoTextView.visibility = coreComponentVisibility
-            this.currencyFromTextView.visibility = coreComponentVisibility
-            this.spinnerFrom.visibility = coreComponentVisibility
-            this.currencyToTextView.visibility = coreComponentVisibility
-            this.spinnerTo.visibility = coreComponentVisibility
-            this.fromValueTextView.visibility = coreComponentVisibility
-            this.editTextFrom.visibility = coreComponentVisibility
-            this.resultTextView.visibility = coreComponentVisibility
-            this.editTextTo.visibility = coreComponentVisibility
-            this.convertButton.visibility = coreComponentVisibility
+            this.binding.infoTextView.visibility = coreComponentVisibility
+            this.binding.currencyFromTextView.visibility = coreComponentVisibility
+            this.binding.currencyConvertFromSpinner.visibility = coreComponentVisibility
+            this.binding.currencyToTextView.visibility = coreComponentVisibility
+            this.binding.currencyConvertToSpinner.visibility = coreComponentVisibility
+            this.binding.fromValueTextView.visibility = coreComponentVisibility
+            this.binding.currencyConvertFromEditText.visibility = coreComponentVisibility
+            this.binding.resultTextView.visibility = coreComponentVisibility
+            this.binding.currencyConvertToEditText.visibility = coreComponentVisibility
+            this.binding.convertButton.visibility = coreComponentVisibility
         }
 
-        model.networkState.observe(this) { connected ->
+       this.model.networkState.observe(this) { connected ->
             if (connected) {
-                progressBarStatusText.text = "Connected fetching data from API"
+                this.binding.progressStatus.text = "Connected fetching data from API"
                 this.model.initializeData()
             } else if(this.model.currencies.value?.isEmpty() == true) {
-                progressBarStatusText.text = "Waiting for connection"
-                Toast.makeText(
-                    this,
-                    "Internet connection not available",
-                    Toast.LENGTH_LONG).show()
+                this.binding.progressStatus.text = "Waiting for connection"
             }
         }
 
-        model.currencies.observe(this) { currencies ->
+        this.model.currencies.observe(this) { currencies ->
             if (currencies.isNotEmpty()) {
                 val adapter = CustomSpinnerAdapter(
                     this,
                     currencies
                 )
-                spinnerFrom.adapter = adapter
-                spinnerTo.adapter = adapter
+                this.binding.currencyConvertFromSpinner.adapter = adapter
+                this.binding.currencyConvertToSpinner.adapter = adapter
             }
         }
 
-        model.fromCurrencyValue.observe(this) { value ->
-            // Prevent unnecessary event firing
-            if (editTextFrom.text.toString().toDoubleOrNull() != value)
-                editTextFrom.setText(value.toUIString())
+        this.model.fromCurrencyValue.observe(this) { value ->
+            if (this.binding.currencyConvertFromEditText.text.toString().toDoubleOrNull() != value)
+                this.binding.currencyConvertFromEditText.setText(value.toUIString())
         }
 
-        model.toCurrencyValue.observe(this) { value ->
-            if (editTextTo.text.toString().toDoubleOrNull() != value)
-                editTextTo.setText(value.toUIString())
+        this.model.toCurrencyValue.observe(this) { value ->
+            if (this.binding.currencyConvertToEditText.text.toString().toDoubleOrNull() != value)
+                this.binding.currencyConvertToEditText.setText(value.toUIString())
         }
 
-        model.convertOperationRunning.observe(this) { status ->
-            this.convertButton.setEnabled(!status)
-            this.spinnerFrom.setEnabled(!status)
-            this.spinnerTo.setEnabled(!status)
+        this.model.convertOperationRunning.observe(this) { status ->
+            this.binding.convertButton.setEnabled(!status)
+            this.binding.currencyConvertFromSpinner.setEnabled(!status)
+            this.binding.currencyConvertToSpinner.setEnabled(!status)
         }
     }
 
     private fun setupListeners() {
-        this.editTextFrom.addTextChangedListener(object : TextWatcher {
+        this.binding.currencyConvertFromEditText.addTextChangedListener(object : TextWatcher {
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) { }
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) { }
             override fun afterTextChanged(s: Editable?) {
@@ -152,53 +118,47 @@ class MainActivity : AppCompatActivity() {
             }
         })
 
-        this.spinnerFrom.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
-            override fun onItemSelected(
-                parent: AdapterView<*>?,
-                view: View?,
-                position: Int,
-                id: Long
-            ) {
-                if (this@MainActivity.model.currencyFromIndex == position)
-                    return
+        this.binding.currencyConvertFromSpinner.onItemSelectedListener =
+            object : AdapterView.OnItemSelectedListener {
+                override fun onItemSelected(
+                    parent: AdapterView<*>?,
+                    view: View?,
+                    position: Int,
+                    id: Long
+                ) {
+                    if (this@MainActivity.model.currencyFromIndex == position)
+                        return
 
-                this@MainActivity.model.clearToCurrency()
-                this@MainActivity.model.currencyFromIndex = position
-            }
-            override fun onNothingSelected(parent: AdapterView<*>?) {
-                this@MainActivity.model.clearToCurrency()
-                this@MainActivity.model.currencyFromIndex = -1
-            }
-        }
-
-        this.spinnerTo.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
-            override fun onItemSelected(
-                parent: AdapterView<*>?,
-                view: View?,
-                position: Int,
-                id: Long
-            ) {
-                if (this@MainActivity.model.currencyToIndex == position)
-                    return
-
-                this@MainActivity.model.clearToCurrency()
-                this@MainActivity.model.currencyToIndex = position
-            }
-            override fun onNothingSelected(parent: AdapterView<*>?) {
-                this@MainActivity.model.clearToCurrency()
-                this@MainActivity.model.currencyToIndex = -1
+                    this@MainActivity.model.clearToCurrency()
+                    this@MainActivity.model.currencyFromIndex = position
+                }
+                override fun onNothingSelected(parent: AdapterView<*>?) {
+                    this@MainActivity.model.clearToCurrency()
+                    this@MainActivity.model.currencyFromIndex = -1
+                }
             }
 
-        }
+        this.binding.currencyConvertToSpinner.onItemSelectedListener =
+            object : AdapterView.OnItemSelectedListener {
+                override fun onItemSelected(
+                    parent: AdapterView<*>?,
+                    view: View?,
+                    position: Int,
+                    id: Long
+                ) {
+                    if (this@MainActivity.model.currencyToIndex == position)
+                        return
 
-        this.convertButton.setOnClickListener {
-            if (this.model.networkState.value != true) {
-                Toast.makeText(
-                    this,
-                    "Network disconnected, cannot convert!",
-                    Toast.LENGTH_SHORT).show()
-                return@setOnClickListener
+                    this@MainActivity.model.clearToCurrency()
+                    this@MainActivity.model.currencyToIndex = position
+                }
+                override fun onNothingSelected(parent: AdapterView<*>?) {
+                    this@MainActivity.model.clearToCurrency()
+                    this@MainActivity.model.currencyToIndex = -1
+                }
             }
+
+        this.binding.convertButton.setOnClickListener {
             this.model.convertButton()
         }
     }
