@@ -57,7 +57,7 @@ class SupportedCurrenciesXmlParser {
                             val result = this@SupportedCurrenciesXmlParser.processSupportedCurrencyText(
                                 textParseStatus, context, deferredList)
                             currentCurrency = result ?: currentCurrency
-                        } catch (e: SkipCurrencyInXmlException) {
+                        } catch (_: SkipCurrencyInXmlException) {
                             currentCurrency = null
                             skipCurrentCurrency = true
                         }
@@ -167,7 +167,7 @@ class SupportedCurrenciesXmlParser {
 
             bitmap = BitmapFactory.decodeFile(outputFile.absolutePath)
         } catch (e: Exception) {
-            Log.e("DOWNLOAD", "Download failed", e)
+            Log.w("DOWNLOAD", "Download image failed skip $fileName", e)
             // If an error occurs skip this image
         }
 
