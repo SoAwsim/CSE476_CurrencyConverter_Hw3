@@ -28,10 +28,14 @@ the calculation result should be dynamic.
 images are cached into the application storage for the next time the application is used.
 
 ## Running
-You need an API key from https://currencyfreaks.com/. This API key is stored in the apikey.properties
-file which generated during the configuration phase of the build.gradle script. The template for this
-file is available as apikey.properties.template which the gradle script is going to generate a apikey.properties
-from this file. Once the file is generated you can write your API key into this file.
+You need an API key from https://currencyfreaks.com/. This API key should be stored in the apikey.properties
+file which is generated during the configuration phase of the build.gradle script. The template for this
+file is available in the apikey.properties.template file which the gradle script is going to generate a apikey.properties
+from the content of this file. Once the file is generated you can write your API key into this file.
+
+After the file is generated put your API key into the apikey.properties file as that is the file which
+the build script reads from. It is also ignored by git therefore you won't be able accidentally push
+this file by default.
 
 Keep in mind that Android Studio might hide other source file since the default file layout is set as
 Android, you need to change that to the Project to see all of the files under your project's directory.
