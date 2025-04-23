@@ -5,6 +5,16 @@ plugins {
     alias(libs.plugins.kotlin.android)
 }
 
+val apiKeyFile = project.rootProject.file("apikey.properties")
+val apiKeyFileTemplate = project.rootProject.file("apikey.properties.template")
+
+if (apiKeyFile.exists()) {
+    println("apikey.properties already exist")
+} else {
+    apiKeyFile.writeText(apiKeyFileTemplate.readText())
+    println("apikey.properties has been created from the apikey.properties.template")
+}
+
 android {
     namespace = "com.example.cse476.currencyconverterhw3"
     compileSdk = 35
@@ -16,10 +26,9 @@ android {
         versionCode = 1
         versionName = "1.0"
 
-        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
-        val apiKeyFile = project.rootProject.file("apikey.properties")
         val properties = Properties()
         properties.load(apiKeyFile.inputStream())
+        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         buildConfigField("String", "API_KEY", "\"${properties["CURRENCY_API_KEY"]}\"")
     }
 
