@@ -39,6 +39,8 @@ this file by default.
 
 Keep in mind that Android Studio might hide other source file since the default file layout is set as
 Android, you need to change that to the Project to see all of the files under your project's directory.
+You might also need to reload files from the disk after the initialization finishes since by default
+apikey.properties might not show up in the Android Studio.
 
 Clone the repo:
 ```bash
